@@ -1,6 +1,7 @@
 import sqlite3
 import threading
 from sqlite3 import Connection
+from models.exceptions.database import DatabaseQueryFailed 
 
 class Database:
 
@@ -44,6 +45,14 @@ class Database:
         cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM RefreshTokens WHERE refresh_token = ?", (refresh_token,))
         return cursor.fetchone() is not None
+
+    def addClipboard(self, role, content: str) -> bool:
+        try:
+            self.cursor.execute("INSERT INTO Clipboard ('from', content) VALUES (?, ?)", (role, content))
+            self.conn.commit()
+            return True
+        except:
+            return False
 
     def get_db():
         db = Database()
