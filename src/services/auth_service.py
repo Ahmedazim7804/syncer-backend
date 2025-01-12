@@ -1,11 +1,7 @@
 from fastapi import HTTPException, status
-from contextlib import AbstractContextManager
-from typing import Callable
-from sqlmodel import Session, select
 from src.core.config import Config
 from src.core.security import Security
-from src.schema.auth_schema import RefreshToken
-from src.repository.auth_repository import AuthRepository
+from src.repository import AuthRepository
 
 class AuthService():
     def __init__(self, auth_repository: AuthRepository):

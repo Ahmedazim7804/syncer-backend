@@ -16,7 +16,9 @@ router = APIRouter(
 @inject
 async def get_access_token_with_password(response: Response, form_data: Annotated[OAuth2PasswordRequestForm, Depends()], auth_service: AuthService = Depends(Provide[Container.auth_service])) -> Token:
 
+
     auth_service.verifyUsernameAndPassword(username=form_data.username, password=form_data.password)
+    print(form_data.username)
     refresh_token, access_token = auth_service.createAccessAndRefreshToken(username=form_data.username);
 
     response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="strict", max_age=Config.REFRESH_TOKEN_EXPIRE_HOURS * 60 * 60)
