@@ -16,3 +16,7 @@ class ClipboardRepository:
             return False
     
         return True
+    
+    def getAllClipboards(self, username: str) -> list[ClipboardItem]:
+        with self.db_factory() as db:
+            return db.exec(select(ClipboardItem).where(ClipboardItem.role == username)).all()

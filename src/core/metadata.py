@@ -5,3 +5,13 @@ PUBLIC_ROUTES = [
     "/api/v1/auth/refresh",
     "/openapi.json",
 ]
+
+USERS = [
+    "mobile",
+    "linux"
+]
+
+OPPOSITE_USER = {
+    "mobile": "linux",
+    "linux": "mobile"
+}

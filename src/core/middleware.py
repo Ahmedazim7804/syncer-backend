@@ -12,6 +12,7 @@ class VerifyTokenMiddleware(BaseHTTPMiddleware):
         url = request.url.path
 
         if url not in PUBLIC_ROUTES:
+
             token = await oauth2_scheme(request)
 
             token_data : TokenData | None = Security.getTokenData(token)
@@ -19,7 +20,7 @@ class VerifyTokenMiddleware(BaseHTTPMiddleware):
             if (token_data is None):
                 raise HTTPException(status_code=401, detail="Invalid Token")
 
-            if (not Security.verify_expiry(token_data)):
+            if (Security.verify_expiry(token_data)):
                 raise HTTPException(status_code=401, detail="Token Expired")
         
         response = await call_next(request)

@@ -1,9 +1,10 @@
 import time
 import jwt
 from datetime import datetime, timezone, timedelta  
-from src.models.auth import TokenData
+from src.models.auth import TokenData, oauth2_scheme
 from src.core.config import Config
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
+from typing import Annotated
 
 class Security:
 
@@ -34,8 +35,11 @@ class Security:
         except:
             return None
     
+
+    # TRUE -> Token is expired
     def verify_expiry(token: TokenData) -> bool:
         try:
             return token.exp < time.time()
         except:
-            return False
+            return True 
+    
