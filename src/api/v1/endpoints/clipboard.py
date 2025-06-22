@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
 from typing import Annotated
 from src.models.auth import oauth2_scheme, TokenData
 from src.models.clipboard import AddClipboardData
@@ -7,12 +7,15 @@ from src.core.container import Container
 from dependency_injector.wiring import Provide, inject
 from src.services import ClipboardService
 from src.core.dependencies import Dependencies
+from src.core.websocket_manager import ConnectionManager
 
 router = APIRouter(
     tags=["clipboard"],
 )
 
 USERNAME_DEPENDENCY = Annotated[str, Depends(Dependencies.get_username)]
+
+manager = ConnectionManager()
 
 @router.post("/clipboard/add")
 @inject
@@ -35,3 +38,17 @@ def get_clipboard(username: USERNAME_DEPENDENCY, clipboard_service: ClipboardSer
     print(clips)
 
     return clips
+
+@router.websocket("/clipboard/ws")
+@inject
+async def clipboard_ws(websocket: WebSocket):
+    await manager.connect(websocket)
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print(f"Message received: {data}")
+            await manager.broadcast(data, sender=websocket)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        print("Client disconnected")

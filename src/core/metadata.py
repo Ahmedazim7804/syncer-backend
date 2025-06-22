@@ -10,8 +10,3 @@ USERS = [
     "mobile",
     "linux"
 ]
-
-OPPOSITE_USER = {
-    "mobile": "linux",
-    "linux": "mobile"
-}

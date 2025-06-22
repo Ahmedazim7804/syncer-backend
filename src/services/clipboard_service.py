@@ -1,5 +1,4 @@
 from src.repository import ClipboardRepository
-from src.core.metadata import OPPOSITE_USER
 from src.schema import ClipboardItem
 
 class ClipboardService():
