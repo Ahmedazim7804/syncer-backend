@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "auth.proto";
+import "clipboard.proto";
+
+enum MessageType {
+    CLIPBOARD = 0;
+    TEXT = 1;
+}
+
+message Message {
+    string id = 1;
+    string senderId = 2;
+    int32 createdAt = 3; // unix timestamp in milliseconds
+    MessageType type = 4;
+    
+    oneof payload {
+        ClipboardMessage clipboard = 5;
+    }
+}
+
+service MessageService {
+    rpc StreamMessages(AuthRequest) returns (stream Message);
+    rpc SendMessage(Message) returns (google.protobuf.Empty);
+}
