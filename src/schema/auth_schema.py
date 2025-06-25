@@ -8,3 +8,11 @@ class RefreshToken(SQLModel, table=True):
     refresh_token: str = Field(primary_key=True)
     role: str
     created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), default=func.now()))
+
+class User(SQLModel, table=True):
+
+    __tablename__ = "Users"
+
+    id: str = Field(primary_key=True)
+    device: str = Field()
+    created_at: datetime = Field(sa_column=Column(DateTime(timezone=True), default=func.now()))

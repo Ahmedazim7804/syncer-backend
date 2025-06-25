@@ -6,21 +6,40 @@ import "clipboard.proto";
 
 enum MessageType {
     CLIPBOARD = 0;
-    TEXT = 1;
+    AUTH = 1;
+    GENERIC_TEXT = 2;
 }
 
-message Message {
+message ClientMessage {
+    string id = 1;
+    string token = 2;
+    int64 createdAt = 3;
+    MessageType type = 4;
+
+    oneof payload {
+        ClipboardMessage clipboard = 5;
+        GenericTextMessage genericText = 6;
+    }
+}
+
+message ServerMessage {
     string id = 1;
     string senderId = 2;
-    int32 createdAt = 3; // unix timestamp in milliseconds
+    int64 createdAt = 3;
     MessageType type = 4;
     
     oneof payload {
         ClipboardMessage clipboard = 5;
+        AuthResponse auth = 6;
+        GenericTextMessage genericText = 7;
     }
 }
 
+message GenericTextMessage {
+    string text = 1;
+}
+
 service MessageService {
-    rpc StreamMessages(AuthRequest) returns (stream Message);
-    rpc SendMessage(Message) returns (google.protobuf.Empty);
+    rpc StreamMessages(ClientMessage) returns (stream ServerMessage);
+    rpc SendMessage(ClientMessage) returns (google.protobuf.Empty);
 }

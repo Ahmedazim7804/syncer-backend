@@ -1,3 +1,9 @@
+CREATE TABLE IF NOT EXISTS "Users" (
+	"id" TEXT PRIMARY KEY NOT NULL,
+	"device"	TEXT NOT NULL,
+	"created_at"	DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS "RefreshTokens" (
 	"role"	TEXT,
 	"refresh_token"	TEXT NOT NULL UNIQUE,

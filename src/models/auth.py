@@ -8,5 +8,10 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
-    role: str | None = None
+    id: str | None = None
+    device: str | None = None
     exp: int | None = None
+
+class UserLoginForm(BaseModel):
+    password: str
+    device: str

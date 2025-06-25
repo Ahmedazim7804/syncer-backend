@@ -3,5 +3,5 @@ from datetime import datetime
 
 class Client(BaseModel):
     id: str
-    name: str
-    joined_at: datetime 
+    device: str
+    created_at: datetime 

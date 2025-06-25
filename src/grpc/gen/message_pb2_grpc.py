@@ -3,9 +3,8 @@
 import grpc
 import warnings
 
-from . import auth_pb2 as auth__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-from . import message_pb2 as message__pb2
+import message_pb2 as message__pb2
 
 GRPC_GENERATED_VERSION = '1.73.0'
 GRPC_VERSION = grpc.__version__
@@ -38,12 +37,12 @@ class MessageServiceStub(object):
         """
         self.StreamMessages = channel.unary_stream(
                 '/MessageService/StreamMessages',
-                request_serializer=auth__pb2.AuthRequest.SerializeToString,
-                response_deserializer=message__pb2.Message.FromString,
+                request_serializer=message__pb2.ClientMessage.SerializeToString,
+                response_deserializer=message__pb2.ServerMessage.FromString,
                 _registered_method=True)
         self.SendMessage = channel.unary_unary(
                 '/MessageService/SendMessage',
-                request_serializer=message__pb2.Message.SerializeToString,
+                request_serializer=message__pb2.ClientMessage.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
 
@@ -68,12 +67,12 @@ def add_MessageServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'StreamMessages': grpc.unary_stream_rpc_method_handler(
                     servicer.StreamMessages,
-                    request_deserializer=auth__pb2.AuthRequest.FromString,
-                    response_serializer=message__pb2.Message.SerializeToString,
+                    request_deserializer=message__pb2.ClientMessage.FromString,
+                    response_serializer=message__pb2.ServerMessage.SerializeToString,
             ),
             'SendMessage': grpc.unary_unary_rpc_method_handler(
                     servicer.SendMessage,
-                    request_deserializer=message__pb2.Message.FromString,
+                    request_deserializer=message__pb2.ClientMessage.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
     }
@@ -102,8 +101,8 @@ class MessageService(object):
             request,
             target,
             '/MessageService/StreamMessages',
-            auth__pb2.AuthRequest.SerializeToString,
-            message__pb2.Message.FromString,
+            message__pb2.ClientMessage.SerializeToString,
+            message__pb2.ServerMessage.FromString,
             options,
             channel_credentials,
             insecure,
@@ -129,7 +128,7 @@ class MessageService(object):
             request,
             target,
             '/MessageService/SendMessage',
-            message__pb2.Message.SerializeToString,
+            message__pb2.ClientMessage.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
             channel_credentials,

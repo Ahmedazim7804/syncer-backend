@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nauth.proto\"\x1c\n\x0b\x41uthRequest\x12\r\n\x05token\x18\x01 \x01(\tb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nauth.proto\"\x1c\n\x0b\x41uthRequest\x12\r\n\x05token\x18\x01 \x01(\t\"\x1f\n\x0c\x41uthResponse\x12\x0f\n\x07message\x18\x01 \x01(\tb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,4 +33,6 @@ if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_AUTHREQUEST']._serialized_start=14
   _globals['_AUTHREQUEST']._serialized_end=42
+  _globals['_AUTHRESPONSE']._serialized_start=44
+  _globals['_AUTHRESPONSE']._serialized_end=75
 # @@protoc_insertion_point(module_scope)

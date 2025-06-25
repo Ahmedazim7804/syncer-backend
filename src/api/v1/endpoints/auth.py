@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 from src.models.auth import Token
@@ -6,6 +6,7 @@ from src.core.config import Config
 from src.services.auth_service import AuthService
 from dependency_injector.wiring import Provide, inject
 from src.core.container import Container
+from src.models.auth import UserLoginForm
 
 router = APIRouter(
     prefix="/auth",
@@ -14,11 +15,11 @@ router = APIRouter(
 
 @router.post("/login")
 @inject
-async def get_access_token_with_password(response: Response, form_data: Annotated[OAuth2PasswordRequestForm, Depends()], auth_service: AuthService = Depends(Provide[Container.auth_service])) -> Token:
+async def get_access_token_with_password(response: Response, body: UserLoginForm, auth_service: AuthService = Depends(Provide[Container.auth_service])) -> Token:
 
-
-    auth_service.verifyUsernameAndPassword(username=form_data.username, password=form_data.password)
-    refresh_token, access_token = auth_service.createAccessAndRefreshToken(username=form_data.username);
+    auth_service.verifyPassword(password=body.password)
+    client = auth_service.createUser(device=body.device)
+    refresh_token, access_token = auth_service.createAccessAndRefreshToken(id=client.id, device=client.device);
 
     response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="strict", max_age=Config.REFRESH_TOKEN_EXPIRE_HOURS * 60 * 60)
     return Token(access_token=access_token, token_type="bearer")

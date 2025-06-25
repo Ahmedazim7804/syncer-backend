@@ -14,6 +14,10 @@ grpcio = {extras = ["asyncio"], version = "^1.73.0"}
 grpcio-tools = "^1.73.0"
 grpc-interceptor = "^0.15.4"
 python-dotenv = "^1.1.0"
+dependency-injector = "^4.48.1"
+uvicorn = "^0.34.3"
+python-multipart = "^0.0.20"
+pyjwt = "^2.10.1"
 
 
 [build-system]
