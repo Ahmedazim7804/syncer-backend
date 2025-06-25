@@ -1,4 +1,3 @@
-
 PUBLIC_ROUTES = [
     "/docs",
     "/api/v1/auth/login",
@@ -6,7 +5,4 @@ PUBLIC_ROUTES = [
     "/openapi.json",
 ]
 
-USERS = [
-    "mobile",
-    "linux"
-]
+USERS = ["mobile", "linux"]

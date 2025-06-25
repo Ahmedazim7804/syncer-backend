@@ -13,27 +13,51 @@ router = APIRouter(
     tags=["auth"],
 )
 
+
 @router.post("/login")
 @inject
-async def get_access_token_with_password(response: Response, body: UserLoginForm, auth_service: AuthService = Depends(Provide[Container.auth_service])) -> Token:
-
+async def get_access_token_with_password(
+    response: Response,
+    body: UserLoginForm,
+    auth_service: AuthService = Depends(Provide[Container.auth_service]),
+) -> Token:
     auth_service.verifyPassword(password=body.password)
     client = auth_service.createUser(device=body.device)
-    refresh_token, access_token = auth_service.createAccessAndRefreshToken(id=client.id, device=client.device);
-
-    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="strict", max_age=Config.REFRESH_TOKEN_EXPIRE_HOURS * 60 * 60)
+    refresh_token, access_token = auth_service.createAccessAndRefreshToken(
+        id=client.id, device=client.device
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        max_age=Config.REFRESH_TOKEN_EXPIRE_HOURS * 60 * 60,
+    )
     return Token(access_token=access_token, token_type="bearer")
 
 
 @router.post("/refresh")
 @inject
-async def get_access_token_with_refresh_token(request: Request, response: Response, auth_service: AuthService = Depends(Provide[Container.auth_service]) ) -> Token:
-
+async def get_access_token_with_refresh_token(
+    request: Request,
+    response: Response,
+    auth_service: AuthService = Depends(Provide[Container.auth_service]),
+) -> Token:
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
-        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token is missing")
+        return HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token is missing"
+        )
 
     new_refresh_token, new_access_token = auth_service.refreshAccessToken(refresh_token)
 
-    response.set_cookie(key="refresh_token", value=new_refresh_token, httponly=True, secure=True, samesite="strict", max_age=Config.REFRESH_TOKEN_EXPIRE_HOURS * 60 * 60)
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        max_age=Config.REFRESH_TOKEN_EXPIRE_HOURS * 60 * 60,
+    )
     return Token(access_token=new_access_token, token_type="bearer")

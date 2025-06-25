@@ -5,6 +5,7 @@ from src.schema.auth_schema import RefreshToken, User
 from src.models.client import Client
 import uuid
 
+
 class AuthRepository:
     def __init__(self, db_factory: Callable[..., AbstractContextManager[Session]]):
         self.db_factory = db_factory
@@ -15,11 +16,7 @@ class AuthRepository:
             db.add(user)
             db.commit()
             db.refresh(user)
-        return Client(
-            id=user.id,
-            device=user.device,
-            created_at=user.created_at
-        )
+        return Client(id=user.id, device=user.device, created_at=user.created_at)
 
     def addRefreshToken(self, refresh_token: str, username: str):
         with self.db_factory() as db:
@@ -28,8 +25,9 @@ class AuthRepository:
 
     def removeRefreshToken(self, refresh_token: str):
         with self.db_factory() as db:
-            
-            results = db.exec(select(RefreshToken).where(RefreshToken.refresh_token == refresh_token)).all()
+            results = db.exec(
+                select(RefreshToken).where(RefreshToken.refresh_token == refresh_token)
+            ).all()
 
             for token in results:
                 db.delete(token)
@@ -38,5 +36,7 @@ class AuthRepository:
 
     def refreshTokenExists(self, refresh_token: str) -> bool:
         with self.db_factory() as db:
-            results = db.exec(select(RefreshToken).where(RefreshToken.refresh_token == refresh_token)).all()
+            results = db.exec(
+                select(RefreshToken).where(RefreshToken.refresh_token == refresh_token)
+            ).all()
             return len(results) > 0

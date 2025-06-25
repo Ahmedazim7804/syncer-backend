@@ -2,22 +2,19 @@ from sqlmodel import create_engine, SQLModel
 from sqlmodel import Session as SQLModelSession
 from contextlib import contextmanager
 
+
 class Database:
     def __init__(self, db_url: str):
         self._engine = create_engine(db_url, echo=True)
 
         self.create_db()
-    
+
     def create_db(self):
         SQLModel.metadata.create_all(self._engine)
 
     @contextmanager
     def session(self):
-        session = SQLModelSession(
-            bind=self._engine,
-            autocommit=False,
-            autoflush=False
-        )
+        session = SQLModelSession(bind=self._engine, autocommit=False, autoflush=False)
         try:
             yield session
         except:
@@ -25,8 +22,6 @@ class Database:
             raise
         finally:
             session.close()
-
-        
 
 
 # class Database:
@@ -45,7 +40,7 @@ class Database:
 #     def __init__(self):
 #         self.conn : sqlite3.Connection | None = None
 #         self.cursor: sqlite3.Cursor | None = None
-        
+
 #         self.createDatabase()
 
 #     def createDatabase(self):
@@ -62,11 +57,11 @@ class Database:
 #     def addRefreshToken(self, refresh_token: str, role: str):
 #         self.cursor.execute("INSERT INTO RefreshTokens (refresh_token, role) VALUES (?, ?)", (refresh_token, role))
 #         self.conn.commit()
-    
+
 #     def removeRefreshToken(self, refresh_token: str):
 #         self.cursor.execute("DELETE FROM RefreshTokens WHERE refresh_token = ?", (refresh_token,))
 #         self.conn.commit()
-    
+
 #     def verifyRefreshToken(self, refresh_token: str) -> bool:
 #         cursor = self.conn.cursor()
 #         cursor.execute("SELECT * FROM RefreshTokens WHERE refresh_token = ?", (refresh_token,))

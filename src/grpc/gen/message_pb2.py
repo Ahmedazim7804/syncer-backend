@@ -4,18 +4,15 @@
 # source: message.proto
 # Protobuf Python Version: 6.31.0
 """Generated protocol buffer code."""
+
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
+
 _runtime_version.ValidateProtobufRuntimeVersion(
-    _runtime_version.Domain.PUBLIC,
-    6,
-    31,
-    0,
-    '',
-    'message.proto'
+    _runtime_version.Domain.PUBLIC, 6, 31, 0, "", "message.proto"
 )
 # @@protoc_insertion_point(imports)
 
@@ -27,21 +24,23 @@ import auth_pb2 as auth__pb2
 import clipboard_pb2 as clipboard__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rmessage.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\nauth.proto\x1a\x0f\x63lipboard.proto\"\xb8\x01\n\rClientMessage\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05token\x18\x02 \x01(\t\x12\x11\n\tcreatedAt\x18\x03 \x01(\x03\x12\x1a\n\x04type\x18\x04 \x01(\x0e\x32\x0c.MessageType\x12&\n\tclipboard\x18\x05 \x01(\x0b\x32\x11.ClipboardMessageH\x00\x12*\n\x0bgenericText\x18\x06 \x01(\x0b\x32\x13.GenericTextMessageH\x00\x42\t\n\x07payload\"\xda\x01\n\rServerMessage\x12\n\n\x02id\x18\x01 \x01(\t\x12\x10\n\x08senderId\x18\x02 \x01(\t\x12\x11\n\tcreatedAt\x18\x03 \x01(\x03\x12\x1a\n\x04type\x18\x04 \x01(\x0e\x32\x0c.MessageType\x12&\n\tclipboard\x18\x05 \x01(\x0b\x32\x11.ClipboardMessageH\x00\x12\x1d\n\x04\x61uth\x18\x06 \x01(\x0b\x32\r.AuthResponseH\x00\x12*\n\x0bgenericText\x18\x07 \x01(\x0b\x32\x13.GenericTextMessageH\x00\x42\t\n\x07payload\"\"\n\x12GenericTextMessage\x12\x0c\n\x04text\x18\x01 \x01(\t*8\n\x0bMessageType\x12\r\n\tCLIPBOARD\x10\x00\x12\x08\n\x04\x41UTH\x10\x01\x12\x10\n\x0cGENERIC_TEXT\x10\x02\x32{\n\x0eMessageService\x12\x32\n\x0eStreamMessages\x12\x0e.ClientMessage\x1a\x0e.ServerMessage0\x01\x12\x35\n\x0bSendMessage\x12\x0e.ClientMessage\x1a\x16.google.protobuf.Emptyb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\rmessage.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\nauth.proto\x1a\x0f\x63lipboard.proto"\xb8\x01\n\rClientMessage\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05token\x18\x02 \x01(\t\x12\x11\n\tcreatedAt\x18\x03 \x01(\x03\x12\x1a\n\x04type\x18\x04 \x01(\x0e\x32\x0c.MessageType\x12&\n\tclipboard\x18\x05 \x01(\x0b\x32\x11.ClipboardMessageH\x00\x12*\n\x0bgenericText\x18\x06 \x01(\x0b\x32\x13.GenericTextMessageH\x00\x42\t\n\x07payload"\xda\x01\n\rServerMessage\x12\n\n\x02id\x18\x01 \x01(\t\x12\x10\n\x08senderId\x18\x02 \x01(\t\x12\x11\n\tcreatedAt\x18\x03 \x01(\x03\x12\x1a\n\x04type\x18\x04 \x01(\x0e\x32\x0c.MessageType\x12&\n\tclipboard\x18\x05 \x01(\x0b\x32\x11.ClipboardMessageH\x00\x12\x1d\n\x04\x61uth\x18\x06 \x01(\x0b\x32\r.AuthResponseH\x00\x12*\n\x0bgenericText\x18\x07 \x01(\x0b\x32\x13.GenericTextMessageH\x00\x42\t\n\x07payload""\n\x12GenericTextMessage\x12\x0c\n\x04text\x18\x01 \x01(\t*8\n\x0bMessageType\x12\r\n\tCLIPBOARD\x10\x00\x12\x08\n\x04\x41UTH\x10\x01\x12\x10\n\x0cGENERIC_TEXT\x10\x02\x32{\n\x0eMessageService\x12\x32\n\x0eStreamMessages\x12\x0e.ClientMessage\x1a\x0e.ServerMessage0\x01\x12\x35\n\x0bSendMessage\x12\x0e.ClientMessage\x1a\x16.google.protobuf.Emptyb\x06proto3'
+)
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'message_pb2', _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "message_pb2", _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
-  _globals['_MESSAGETYPE']._serialized_start=519
-  _globals['_MESSAGETYPE']._serialized_end=575
-  _globals['_CLIENTMESSAGE']._serialized_start=76
-  _globals['_CLIENTMESSAGE']._serialized_end=260
-  _globals['_SERVERMESSAGE']._serialized_start=263
-  _globals['_SERVERMESSAGE']._serialized_end=481
-  _globals['_GENERICTEXTMESSAGE']._serialized_start=483
-  _globals['_GENERICTEXTMESSAGE']._serialized_end=517
-  _globals['_MESSAGESERVICE']._serialized_start=577
-  _globals['_MESSAGESERVICE']._serialized_end=700
+    DESCRIPTOR._loaded_options = None
+    _globals["_MESSAGETYPE"]._serialized_start = 519
+    _globals["_MESSAGETYPE"]._serialized_end = 575
+    _globals["_CLIENTMESSAGE"]._serialized_start = 76
+    _globals["_CLIENTMESSAGE"]._serialized_end = 260
+    _globals["_SERVERMESSAGE"]._serialized_start = 263
+    _globals["_SERVERMESSAGE"]._serialized_end = 481
+    _globals["_GENERICTEXTMESSAGE"]._serialized_start = 483
+    _globals["_GENERICTEXTMESSAGE"]._serialized_end = 517
+    _globals["_MESSAGESERVICE"]._serialized_start = 577
+    _globals["_MESSAGESERVICE"]._serialized_end = 700
 # @@protoc_insertion_point(module_scope)

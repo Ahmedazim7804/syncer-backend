@@ -21,9 +21,8 @@ origins = [
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
-    "http://localhost:1420"
+    "http://localhost:1420",
 ]
-
 
 
 app = FastAPI()
@@ -39,8 +38,8 @@ app.add_middleware(
 
 app.include_router(api_v1_routers)
 
-async def main():
 
+async def main():
     container = Container()
     container.db()
     container.wire(modules=[__name__])
@@ -51,6 +50,7 @@ async def main():
     grpcServer = GrpcServer("50051")
 
     await asyncio.gather(fastApiServer.serve(), grpcServer.run())
+
 
 if __name__ == "__main__":
     asyncio.run(main())
