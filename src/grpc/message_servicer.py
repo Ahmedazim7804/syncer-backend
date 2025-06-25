@@ -19,21 +19,6 @@ class MessageServicer(message_pb2_grpc.MessageServiceServicer):
         self.connections = connections
         self.auth_service = auth_service
 
-    def construct_message(
-        self, message: any, type: MessageType, senderId: str
-    ) -> ServerMessage:
-        message = ServerMessage(
-            id=str(uuid.uuid4()),
-            senderId=senderId,
-            createdAt=int(time.time() * 1000),
-            type=type,
-            clipboard=message if type == MessageType.CLIPBOARD else None,
-            auth=message if type == MessageType.AUTH else None,
-            genericText=message if type == MessageType.GENERIC_TEXT else None,
-        )
-
-        return message
-
     async def StreamMessages(self, request: ClientMessage, context):
         logger.info(f"StreamMessages Request Made with token: {request.token}")
 
@@ -83,14 +68,7 @@ class MessageServicer(message_pb2_grpc.MessageServiceServicer):
             return empty_pb2.Empty()
 
         messageType = request.type
-        payload = None
-        match messageType:
-            case MessageType.CLIPBOARD:
-                payload = request.clipboard
-            case MessageType.GENERIC_TEXT:
-                payload = request.genericText
-            case _:
-                payload = None
+        payload = self.extract_payload(request)
 
         for connection in self.connections:
             if connection.id != tokenData.id:
@@ -102,3 +80,27 @@ class MessageServicer(message_pb2_grpc.MessageServiceServicer):
                 )
 
         return empty_pb2.Empty()
+
+    def construct_message(
+        self, message: any, type: MessageType, senderId: str
+    ) -> ServerMessage:
+        message = ServerMessage(
+            id=str(uuid.uuid4()),
+            senderId=senderId,
+            createdAt=int(time.time() * 1000),
+            type=type,
+            clipboard=message if type == MessageType.CLIPBOARD else None,
+            auth=message if type == MessageType.AUTH else None,
+            genericText=message if type == MessageType.GENERIC_TEXT else None,
+        )
+
+        return message
+
+    def extract_payload(self, request: ClientMessage) -> any:
+        match request.type:
+            case MessageType.CLIPBOARD:
+                return request.clipboard
+            case MessageType.GENERIC_TEXT:
+                return request.genericText
+            case _:
+                return None
