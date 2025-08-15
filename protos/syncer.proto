@@ -1,13 +1,26 @@
 syntax = "proto3";
+package syncer;
 
 import "google/protobuf/empty.proto";
-import "auth.proto";
-import "clipboard.proto";
+import "google/protobuf/wrappers.proto";
 
 enum MessageType {
     CLIPBOARD = 0;
     AUTH = 1;
     GENERIC_TEXT = 2;
+}
+
+
+message AuthRequest {
+    string token = 1;
+}
+
+message AuthResponse {
+    string message = 1;
+}
+
+message ClipboardMessage {
+    string content = 1;
 }
 
 message ClientMessage {
@@ -19,6 +32,7 @@ message ClientMessage {
     oneof payload {
         ClipboardMessage clipboard = 5;
         GenericTextMessage genericText = 6;
+        google.protobuf.Empty empty = 7;
     }
 }
 
@@ -42,4 +56,5 @@ message GenericTextMessage {
 service MessageService {
     rpc StreamMessages(ClientMessage) returns (stream ServerMessage);
     rpc SendMessage(ClientMessage) returns (google.protobuf.Empty);
+    rpc IsConnected(google.protobuf.Empty) returns (google.protobuf.BoolValue);
 }

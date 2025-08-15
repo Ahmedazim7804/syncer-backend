@@ -9,6 +9,7 @@ class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
         modules=[
             "src.api.v1.endpoints.auth",
+            "src.api.v1.endpoints.me",
         ]
     )
 

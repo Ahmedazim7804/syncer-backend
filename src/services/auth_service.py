@@ -28,6 +28,9 @@ class AuthService:
     def createUser(self, device: str) -> Client:
         return self.auth_repository.createUser(device)
 
+    def getUser(self, id: str) -> Client:
+        return self.auth_repository.getUser(id)
+
     def verifyAccessToken(self, access_token: str) -> TokenData | None:
         token_data = Security.getTokenData(access_token)
 

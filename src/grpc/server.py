@@ -1,15 +1,10 @@
 import grpc
-from concurrent import futures
 from src.models.connection import Connection
-from src.environment import Environment
-import asyncio
 from src.grpc.message_servicer import MessageServicer
-from src.grpc.gen import message_pb2_grpc
-from src.grpc.interceptors import AuthInterceptor
+from src.grpc.gen import syncer_pb2_grpc
 from src.services.auth_service import AuthService
 from src.core.container import Container
 from dependency_injector.wiring import inject, Provide
-from fastapi import Depends
 
 
 @inject
@@ -31,7 +26,7 @@ class GrpcServer:
     async def run(self):
         self.server = grpc.aio.server()
         self.server.add_insecure_port(f"[::]:{self.port}")
-        message_pb2_grpc.add_MessageServiceServicer_to_server(
+        syncer_pb2_grpc.add_MessageServiceServicer_to_server(
             MessageServicer(self.connections, self.auth_service), self.server
         )
         await self.server.start()

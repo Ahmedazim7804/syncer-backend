@@ -3,21 +3,29 @@ import time
 import uuid
 from google.protobuf import empty_pb2
 from loguru import logger
-from src.grpc.gen import message_pb2_grpc
+from src.grpc.gen import syncer_pb2_grpc
 from src.models.connection import Connection
 from src.services.auth_service import AuthService
-from src.grpc.gen.message_pb2 import ClientMessage, ServerMessage, MessageType
-from src.grpc.gen.auth_pb2 import AuthResponse
+from src.grpc.gen.syncer_pb2 import (
+    ClientMessage,
+    ServerMessage,
+    MessageType,
+    AuthResponse,
+    google_dot_protobuf_dot_wrappers__pb2,
+)
 from src.core.security import TokenData
 
 
-class MessageServicer(message_pb2_grpc.MessageServiceServicer):
+class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
     def __init__(
         self, connections: list[Connection], auth_service: AuthService
     ) -> None:
         super().__init__()
         self.connections = connections
         self.auth_service = auth_service
+
+    async def IsConnected(self, request: empty_pb2.Empty, context):
+        return google_dot_protobuf_dot_wrappers__pb2.BoolValue(value=True)
 
     async def StreamMessages(self, request: ClientMessage, context):
         logger.info(f"StreamMessages Request Made with token: {request.token}")

@@ -18,6 +18,11 @@ class AuthRepository:
             db.refresh(user)
         return Client(id=user.id, device=user.device, created_at=user.created_at)
 
+    def getUser(self, id: str) -> Client:
+        with self.db_factory() as db:
+            user = db.exec(select(User).where(User.id == id)).first()
+            return Client(id=user.id, device=user.device, created_at=user.created_at)
+
     def addRefreshToken(self, refresh_token: str, username: str):
         with self.db_factory() as db:
             db.add(RefreshToken(refresh_token=refresh_token, role=username))
