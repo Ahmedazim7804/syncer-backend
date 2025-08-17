@@ -5,16 +5,15 @@ gen_path = os.path.join(os.path.dirname(__file__), "grpc", "gen")
 if gen_path not in sys.path:
     sys.path.insert(0, gen_path)
 
-from fastapi import FastAPI, Request, Response
-from starlette.middleware.cors import CORSMiddleware
-from starlette.middleware import Middleware
-from src.api.v1.routes import routers as api_v1_routers
-from src.core.middleware import VerifyTokenMiddleware
-from src.core.container import Container
-from fastapi.routing import APIRoute
-from src.grpc.server import GrpcServer
-import asyncio
-import uvicorn
+from fastapi import FastAPI  # noqa: E402
+from starlette.middleware.cors import CORSMiddleware  # noqa: E402
+from src.api.v1.routes import routers as api_v1_routers  # noqa: E402
+from src.core.middleware import VerifyTokenMiddleware  # noqa: E402
+from src.core.container import Container  # noqa: E402
+from src.grpc.server import GrpcServer  # noqa: E402
+import asyncio  # noqa: E402
+import uvicorn  # noqa: E402
+
 
 origins = [
     "http://localhost.tiangolo.com",

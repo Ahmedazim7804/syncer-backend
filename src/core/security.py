@@ -36,6 +36,7 @@ class Security:
 
     def getTokenData(token: str) -> TokenData | None:
         try:
+            token = token.replace("Bearer ", "")
             payload = jwt.decode(
                 token, Config.SECRET_KEY, algorithms=[Config.ALGORITHM]
             )

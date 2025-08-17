@@ -10,20 +10,14 @@ class AuthService:
     def __init__(self, auth_repository: AuthRepository):
         self.auth_repository = auth_repository
 
-    def verifyPassword(self, password: str | None):
+    def verifyPassword(self, password: str | None) -> bool:
         if password is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Empty Password",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            return False
 
         if password != Config.PASSWORD:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect password",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            return False
+
+        return True
 
     def createUser(self, device: str) -> Client:
         return self.auth_repository.createUser(device)

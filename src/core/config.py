@@ -5,7 +5,6 @@ load_dotenv()
 
 
 class Config:
-    # auth
     SECRET_KEY = os.getenv("SECRET_KEY")
     ACCESS_TOKEN_EXPIRE_HOURS = float(os.getenv("ACCESS_TOKEN_EXPIRE_HOURS"))
     REFRESH_TOKEN_EXPIRE_HOURS = float(os.getenv("REFRESH_TOKEN_EXPIRE_HOURS"))
@@ -16,3 +15,4 @@ class Config:
         if (os.getenv("DB_URL") is not None)
         else "sqlite:///database.db"
     )
+    CERTS_PATH = os.getenv("CERTS_PATH")
