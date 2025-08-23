@@ -6,6 +6,7 @@ from src.grpc.gen import syncer_pb2_grpc
 from src.services.auth_service import AuthService
 from src.core.container import Container
 from dependency_injector.wiring import inject, Provide
+from src.grpc.interceptors import AuthInterceptor
 import os
 
 
@@ -33,7 +34,7 @@ class GrpcServer:
             require_client_auth=True,
         )
 
-        self.server = grpc.aio.server()
+        self.server = grpc.aio.server(interceptors=[AuthInterceptor(self.auth_service)])
         self.server.add_secure_port(f"[::]:{self.port}", server_creds)
 
         syncer_pb2_grpc.add_MessageServiceServicer_to_server(

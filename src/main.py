@@ -41,7 +41,7 @@ app.include_router(api_v1_routers)
 async def main():
     container = Container()
     container.db()
-    container.wire(modules=[__name__])
+    container.wire(modules=[__name__, "src.grpc.server", "src.grpc.interceptors"])
 
     fastApiConfig = uvicorn.Config(app, host="0.0.0.0", port=8000)
     fastApiServer = uvicorn.Server(config=fastApiConfig)

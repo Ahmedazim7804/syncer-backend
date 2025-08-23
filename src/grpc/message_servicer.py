@@ -10,7 +10,6 @@ from src.grpc.gen.syncer_pb2 import (
     ClientMessage,
     ServerMessage,
     MessageType,
-    AuthResponse,
     google_dot_protobuf_dot_wrappers__pb2,
 )
 from src.core.security import TokenData
@@ -30,27 +29,14 @@ class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
     async def StreamMessages(self, request: ClientMessage, context):
         logger.info(f"StreamMessages Request Made with token: {request.token}")
 
-        if request.token is None or request.token == "":
-            logger.error("No token provided")
-            yield self.construct_message(
-                type=MessageType.AUTH,
-                message=AuthResponse(message="Unauthorized"),
-                senderId="server",
-            )
-            return
-
-        if not self.auth_service.verifyAccessToken(request.token):
-            logger.error("Invalid or Expired access token")
-            yield self.construct_message(
-                type=MessageType.AUTH,
-                message=AuthResponse(message="Unauthorized"),
-                senderId="server",
-            )
-            return
-
+        # Authentication is handled by the interceptor, so we can proceed directly
         client_queue = asyncio.Queue()
 
-        connection = Connection(id=request.token, queue=client_queue)
+        # Use token data from the verified token for connection ID
+        tokenData = self.auth_service.verifyAccessToken(request.token)
+        connection_id = tokenData.id if tokenData else request.token
+
+        connection = Connection(id=connection_id, queue=client_queue)
         self.connections.append(connection)
 
         logger.info(f"New connection established: {connection.id}")
