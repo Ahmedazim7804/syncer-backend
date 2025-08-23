@@ -9,10 +9,3 @@ CREATE TABLE IF NOT EXISTS "RefreshTokens" (
 	"refresh_token"	TEXT NOT NULL UNIQUE,
 	PRIMARY KEY("refresh_token")
 );
-
-CREATE TABLE IF NOT EXISTS "Clipboard" (
-	"id" INTEGER PRIMARY KEY AUTOINCREMENT,
-	"from"	TEXT,
-	"content"	TEXT NOT NULL,
-	"created_at"	DATETIME DEFAULT CURRENT_TIMESTAMP
-);

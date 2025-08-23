@@ -20,3 +20,6 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(
         sa_column=Column(DateTime(timezone=True), default=func.now())
     )
+    last_seen: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), default=func.now())
+    )
