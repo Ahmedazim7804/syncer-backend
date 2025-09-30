@@ -6,7 +6,8 @@ from asyncio import Queue
 
 class Connection(BaseModel):
     id: str
-    # client: Client
+    client: Client
+    active: bool
     queue: Queue
 
     model_config = {"arbitrary_types_allowed": True}

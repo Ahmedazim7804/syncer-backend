@@ -1,18 +1,37 @@
 import grpc
 from src.services.auth_service import AuthService
+from src.core.metadata import PUBLIC_ROUTES
 
 
 class AuthInterceptor(grpc.aio.ServerInterceptor):
     def __init__(self, auth_service: AuthService = AuthService):
         self.auth_service = auth_service
 
+    def verify_token_from_metadata(self, context) -> bool:
+        """Extract and verify token from request metadata (headers)"""
+        try:
+            metadata = dict(context.invocation_metadata())
+            # Support both 'authorization' and 'token' metadata keys
+            token = metadata.get('authorization', '')
+            if token.startswith('Bearer '):
+                token = token[7:]  # Remove 'Bearer ' prefix
+            elif not token:
+                token = metadata.get('token', '')
+            
+            if not token:
+                return False
+            
+            return self.auth_service.verifyAccessToken(token) is not None
+        except Exception:
+            return False
+
     async def intercept_unary_unary(self, request, context, handler):
-        if not self.verify_token(request, isIterator=False):
+        if not self.verify_token_from_metadata(context):
             await context.abort(grpc.StatusCode.UNAUTHENTICATED, "Unauthorized")
         return await handler.unary_unary(request, context)
 
     async def intercept_server_stream(self, request, context, handler):
-        if not self.verify_token(request, isIterator=False):
+        if not self.verify_token_from_metadata(context):
             await context.abort(grpc.StatusCode.UNAUTHENTICATED, "Unauthorized")
             return
 
@@ -20,38 +39,30 @@ class AuthInterceptor(grpc.aio.ServerInterceptor):
             yield response
 
     async def intercept_client_stream(self, request_iterator, context, handler):
-        if not self.verify_token(request_iterator, isIterator=True):
+        if not self.verify_token_from_metadata(context):
             await context.abort(grpc.StatusCode.UNAUTHENTICATED, "Unauthorized")
+            return None
+        
         return await handler.stream_unary(request_iterator, context)
 
     async def intercept_bi_di_stream(self, request_iterator, context, handler):
-        if not self.verify_token(request_iterator, isIterator=True):
+        if not self.verify_token_from_metadata(context):
             await context.abort(grpc.StatusCode.UNAUTHENTICATED, "Unauthorized")
+            return
 
-        async def _iter():
-            async for response in handler.stream_stream(request_iterator, context):
-                yield response
-
-        return _iter()
-
-    def verify_token(self, request, isIterator: bool = False) -> bool:
-        token = None
-        try:
-            token = request.token
-        except Exception:
-            return False
-
-        return self.auth_service.verifyAccessToken(token) is not None
+        async for response in handler.stream_stream(request_iterator, context):
+            yield response
 
     async def intercept_service(self, continuation, handler_call_details):
-        _ = handler_call_details.method.split("/")[-1]
-
         handler = await continuation(handler_call_details)
+
+        if handler_call_details.method in PUBLIC_ROUTES:
+            return handler
+
         if handler is None:
             return None
 
         if handler.unary_unary:
-
             async def _unary_unary(request, context):
                 return await self.intercept_unary_unary(request, context, handler)
 
@@ -62,7 +73,6 @@ class AuthInterceptor(grpc.aio.ServerInterceptor):
             )
 
         if handler.unary_stream:
-
             async def _unary_stream(request, context):
                 async for response in self.intercept_server_stream(
                     request, context, handler
@@ -76,7 +86,6 @@ class AuthInterceptor(grpc.aio.ServerInterceptor):
             )
 
         if handler.stream_unary:
-
             async def _stream_unary(request_iterator, context):
                 return await self.intercept_client_stream(
                     request_iterator, context, handler
@@ -89,11 +98,12 @@ class AuthInterceptor(grpc.aio.ServerInterceptor):
             )
 
         if handler.stream_stream:
-
             async def _stream_stream(request_iterator, context):
-                return await self.intercept_bi_di_stream(
+                # Fixed: properly yield from the async generator
+                async for response in self.intercept_bi_di_stream(
                     request_iterator, context, handler
-                )
+                ):
+                    yield response
 
             return grpc.stream_stream_rpc_method_handler(
                 _stream_stream,

@@ -38,16 +38,16 @@ class MessageServiceStub(object):
         """
         self.StreamMessages = channel.unary_stream(
                 '/syncer.MessageService/StreamMessages',
-                request_serializer=syncer__pb2.ClientMessage.SerializeToString,
+                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
                 response_deserializer=syncer__pb2.ServerMessage.FromString,
                 _registered_method=True)
-        self.SendMessage = channel.unary_unary(
+        self.SendMessage = channel.stream_unary(
                 '/syncer.MessageService/SendMessage',
                 request_serializer=syncer__pb2.ClientMessage.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
-        self.IsConnected = channel.unary_unary(
-                '/syncer.MessageService/IsConnected',
+        self.IsReachable = channel.unary_unary(
+                '/syncer.MessageService/IsReachable',
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_wrappers__pb2.BoolValue.FromString,
                 _registered_method=True)
@@ -62,13 +62,13 @@ class MessageServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SendMessage(self, request, context):
+    def SendMessage(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def IsConnected(self, request, context):
+    def IsReachable(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -79,16 +79,16 @@ def add_MessageServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'StreamMessages': grpc.unary_stream_rpc_method_handler(
                     servicer.StreamMessages,
-                    request_deserializer=syncer__pb2.ClientMessage.FromString,
+                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                     response_serializer=syncer__pb2.ServerMessage.SerializeToString,
             ),
-            'SendMessage': grpc.unary_unary_rpc_method_handler(
+            'SendMessage': grpc.stream_unary_rpc_method_handler(
                     servicer.SendMessage,
                     request_deserializer=syncer__pb2.ClientMessage.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
-            'IsConnected': grpc.unary_unary_rpc_method_handler(
-                    servicer.IsConnected,
+            'IsReachable': grpc.unary_unary_rpc_method_handler(
+                    servicer.IsReachable,
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                     response_serializer=google_dot_protobuf_dot_wrappers__pb2.BoolValue.SerializeToString,
             ),
@@ -118,7 +118,7 @@ class MessageService(object):
             request,
             target,
             '/syncer.MessageService/StreamMessages',
-            syncer__pb2.ClientMessage.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             syncer__pb2.ServerMessage.FromString,
             options,
             channel_credentials,
@@ -131,7 +131,7 @@ class MessageService(object):
             _registered_method=True)
 
     @staticmethod
-    def SendMessage(request,
+    def SendMessage(request_iterator,
             target,
             options=(),
             channel_credentials=None,
@@ -141,8 +141,8 @@ class MessageService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
+        return grpc.experimental.stream_unary(
+            request_iterator,
             target,
             '/syncer.MessageService/SendMessage',
             syncer__pb2.ClientMessage.SerializeToString,
@@ -158,7 +158,7 @@ class MessageService(object):
             _registered_method=True)
 
     @staticmethod
-    def IsConnected(request,
+    def IsReachable(request,
             target,
             options=(),
             channel_credentials=None,
@@ -171,7 +171,7 @@ class MessageService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/syncer.MessageService/IsConnected',
+            '/syncer.MessageService/IsReachable',
             google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             google_dot_protobuf_dot_wrappers__pb2.BoolValue.FromString,
             options,

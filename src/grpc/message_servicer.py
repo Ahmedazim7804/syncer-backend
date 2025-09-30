@@ -6,10 +6,17 @@ from loguru import logger
 from src.grpc.gen import syncer_pb2_grpc
 from src.models.connection import Connection
 from src.services.auth_service import AuthService
+from datetime import datetime
+from sqlalchemy import event
+from sqlmodel import Session
+from src.schema.auth_schema import User
+from typing import Optional
 from src.grpc.gen.syncer_pb2 import (
     ClientMessage,
     ServerMessage,
     MessageType,
+    ConnectedDevices,
+    DeviceInfo,
     google_dot_protobuf_dot_wrappers__pb2,
 )
 from src.core.security import TokenData
@@ -17,61 +24,76 @@ from src.core.security import TokenData
 
 class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
     def __init__(
-        self, connections: list[Connection], auth_service: AuthService
+        self,
+        connections: list[Connection],
+        auth_service: AuthService
     ) -> None:
         super().__init__()
         self.connections = connections
         self.auth_service = auth_service
 
-    async def IsConnected(self, request: empty_pb2.Empty, context):
+    async def IsReachable(self, request: empty_pb2.Empty, context):
         return google_dot_protobuf_dot_wrappers__pb2.BoolValue(value=True)
+    
+    def extractUserToken(self, context):
+        metadata = dict(context.invocation_metadata())
+        token = metadata.get('authorization', '')
+        if token.startswith('Bearer '):
+            token = token[7:]
+
+        logger.info(f"StreamMessages Request Made with token: {token}")
+        tokenData: TokenData | None = self.auth_service.verifyAccessToken(token)
+        tokenData = self.auth_service.verifyAccessToken(token)
+
+        return tokenData
 
     async def StreamMessages(self, request: ClientMessage, context):
-        logger.info(f"StreamMessages Request Made with token: {request.token}")
 
-        # Authentication is handled by the interceptor, so we can proceed directly
-        client_queue = asyncio.Queue()
+        tokenData = self.extractUserToken(context)
+        connection_id = tokenData.id
 
-        # Use token data from the verified token for connection ID
-        tokenData = self.auth_service.verifyAccessToken(request.token)
-        connection_id = tokenData.id if tokenData else request.token
+        if (connection_id in self.connections.keys()):
+            self.connections[connection_id].active = True
+        else:
+            self.connections[connection_id] = Connection(
+                id=connection_id,
+                active=True,
+                client=self.auth_service.getUser(connection_id),
+                queue=asyncio.Queue()
+            )
 
-        connection = Connection(id=connection_id, queue=client_queue)
-        self.connections.append(connection)
+        await self.broadcast(sender="sender", message=self.get_all_devices())
 
-        logger.info(f"New connection established: {connection.id}")
+        logger.info(f"New connection established: {connection_id}")
 
         try:
             while True:
-                message = await client_queue.get()
+                message = await self.connections[connection_id].queue.get()
 
                 yield message
         except Exception as e:
             logger.error(f"Error in StreamMessages: {e}")
         finally:
-            self.connections.remove(connection)
-            logger.info(f"Connection closed: {connection.id}")
+            self.auth_service.updateUser(id=connection_id, last_seen=datetime.now())
+            self.connections.pop(connection_id)
+            await self.broadcast(sender="sender", message=self.get_all_devices())
+            logger.info(f"Connection closed: {connection_id}")
 
-    async def SendMessage(self, request: ClientMessage, context):
-        logger.info(f"Received message: {request}")
+    async def SendMessage(self, request_iterator, context):
+        async for request in request_iterator:
+            logger.info(f"Received message: {request}")
 
-        tokenData: TokenData | None = self.auth_service.verifyAccessToken(request.token)
+            tokenData = self.extractUserToken(context)
 
-        if tokenData is None:
-            logger.error("Invalid or Expired access token")
-            return empty_pb2.Empty()
+            messageType = request.type
+            payload = self.extract_payload(request)
 
-        messageType = request.type
-        payload = self.extract_payload(request)
-
-        for connection in self.connections:
-            if connection.id != tokenData.id:
-                print("Sending message to connection: ", connection.id)
-                await connection.queue.put(
-                    self.construct_message(
-                        message=payload, type=messageType, senderId=tokenData.id
-                    )
+            await self.broadcast(
+                tokenData.id,
+                self.construct_message(
+                    message=payload, type=messageType, senderId=tokenData.id
                 )
+            )
 
         return empty_pb2.Empty()
 
@@ -84,7 +106,6 @@ class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
             createdAt=int(time.time() * 1000),
             type=type,
             clipboard=message if type == MessageType.CLIPBOARD else None,
-            auth=message if type == MessageType.AUTH else None,
             genericText=message if type == MessageType.GENERIC_TEXT else None,
         )
 
@@ -98,3 +119,38 @@ class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
                 return request.genericText
             case _:
                 return None
+
+    def get_all_devices(self):
+        message = ServerMessage(
+            id=str(uuid.uuid4()),
+            senderId="sender",
+            createdAt=int(time.time() * 1000),
+            type=MessageType.CONNECTED_DEVICES,
+            clipboard=None,
+            genericText=None,
+            connectedDevices=ConnectedDevices(
+                devices = [
+                    DeviceInfo(
+                        id = connection.client.id,
+                        ip = connection.client.ip,
+                        name = connection.client.device,
+                        connected = True if connection.active is True else False,
+                        last_seen = int(connection.client.last_seen.timestamp())
+                    )
+                    for connection in self.connections.values()
+                ]
+            )
+        )
+
+        return message
+    
+    async def broadcast(self, sender: str, message, to: Optional[list[str]] = None):
+        recievers = self.connections.values() if to is None else filter(lambda connection: connection.id in to, self.connections.values())
+
+        if (to is None):
+            for connection in recievers:
+                if connection.id != sender and connection.active:
+                    print("Sending message to connection: ", connection.id)
+                    await connection.queue.put(
+                        message
+                    )

@@ -3,6 +3,7 @@ PUBLIC_ROUTES = [
     "/api/v1/auth/login",
     "/api/v1/auth/refresh",
     "/openapi.json",
+    "/syncer.MessageService/IsReachable"
 ]
 
 USERS = ["mobile", "linux"]

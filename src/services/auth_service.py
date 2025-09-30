@@ -4,7 +4,9 @@ from src.core.security import Security
 from src.repository import AuthRepository
 from src.models.client import Client
 from src.core.security import TokenData
-
+from src.models.auth import UserLoginForm
+from typing import Optional
+from datetime import datetime
 
 class AuthService:
     def __init__(self, auth_repository: AuthRepository):
@@ -19,8 +21,13 @@ class AuthService:
 
         return True
 
-    def createUser(self, device: str) -> Client:
-        return self.auth_repository.createUser(device)
+    def createUser(self, loginForm: UserLoginForm) -> Client:
+        return self.auth_repository.createUser(
+            ip=loginForm.ip,
+            id=loginForm.id,
+            platform=loginForm.platform.value,
+            device=loginForm.device,
+        )
 
     def getUser(self, id: str) -> Client:
         return self.auth_repository.getUser(id)
@@ -76,3 +83,9 @@ class AuthService:
         self.auth_repository.removeRefreshToken(refresh_token)
 
         return self.createAccessAndRefreshToken(token_data.id, token_data.device)
+
+    def updateUser(self, id: str, device: Optional[str] = None, ip: Optional[str] = None, last_seen: Optional[datetime] = None):
+        self.auth_repository.updateUser(id, ip, device, last_seen);
+
+    def getAllUsers(self):
+        return self.auth_repository.getAllUsers()

@@ -7,12 +7,14 @@ from src.services.auth_service import AuthService
 from src.core.container import Container
 from dependency_injector.wiring import inject, Provide
 from src.grpc.interceptors import AuthInterceptor
+from src.models.client import Client
 import os
+import asyncio
 
 
 @inject
 class GrpcServer:
-    connections: list[Connection] = []
+    connections: dict[str, Connection] = {}
 
     def __init__(
         self, port: int, auth_service: AuthService = Provide[Container.auth_service]
@@ -20,6 +22,23 @@ class GrpcServer:
         self.port = port
         self.auth_service = auth_service
         self.server_cert, self.server_key, self.ca_cert = self.load_cert()
+
+        self.connections = { 
+            user.id:
+            Connection(
+                active=False,
+                id=user.id,
+                client=Client(
+                    ip=user.ip,
+                    id=user.id,
+                    device=user.device,
+                    platform=user.platform,
+                    created_at=user.created_at,
+                    last_seen=user.last_seen,
+                ),
+                queue=asyncio.Queue()
+            ) for user in self.auth_service.getAllUsers()
+         }
 
     def add_service(self):
         pass
@@ -44,10 +63,10 @@ class GrpcServer:
         await self.server.wait_for_termination()
 
     def add_connection(self, connection: Connection):
-        self.connections.append(connection)
+        self.connections[connection.id] = connection
 
     def remove_connection(self, connection: Connection):
-        self.connections.remove(connection)
+        self.connections.pop(connection.id)
 
     def load_cert(self) -> tuple[bytes, bytes]:
         base_path = Config.CERTS_PATH

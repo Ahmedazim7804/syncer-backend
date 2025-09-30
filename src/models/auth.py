@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer
+from .platforms import Platform
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -16,5 +17,8 @@ class TokenData(BaseModel):
 
 
 class UserLoginForm(BaseModel):
-    password: str
+    id: str
     device: str
+    ip: str
+    password: str
+    platform: Platform

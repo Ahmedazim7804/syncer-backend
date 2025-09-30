@@ -36,7 +36,7 @@ async def get_access_token_with_password(
         )
 
     try:
-        client = auth_service.createUser(device=body.device)
+        client = auth_service.createUser(body)
         refresh_token, access_token = auth_service.createAccessAndRefreshToken(
             id=client.id, device=client.device
         )

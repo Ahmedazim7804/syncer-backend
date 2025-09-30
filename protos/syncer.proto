@@ -5,56 +5,53 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 
 enum MessageType {
-    CLIPBOARD = 0;
-    AUTH = 1;
-    GENERIC_TEXT = 2;
+  CLIPBOARD = 0;
+  GENERIC_TEXT = 1;
+  CONNECTED_DEVICES = 2;
 }
 
+message ClipboardMessage { string content = 1; }
 
-message AuthRequest {
-    string token = 1;
+message DeviceInfo {
+  string id = 1;
+  string ip = 2;
+  string name = 3;
+  string platform = 4;
+  bool connected = 5;
+  int64 last_seen = 6;
 }
 
-message AuthResponse {
-    string message = 1;
-}
-
-message ClipboardMessage {
-    string content = 1;
-}
+message ConnectedDevices { repeated DeviceInfo devices = 1; }
 
 message ClientMessage {
-    string id = 1;
-    string token = 2;
-    int64 createdAt = 3;
-    MessageType type = 4;
+  string id = 1;
+  int64 createdAt = 2;
+  MessageType type = 3;
 
-    oneof payload {
-        ClipboardMessage clipboard = 5;
-        GenericTextMessage genericText = 6;
-        google.protobuf.Empty empty = 7;
-    }
+  oneof payload {
+    ClipboardMessage clipboard = 4;
+    GenericTextMessage genericText = 5;
+    google.protobuf.Empty empty = 6;
+  }
 }
 
 message ServerMessage {
-    string id = 1;
-    string senderId = 2;
-    int64 createdAt = 3;
-    MessageType type = 4;
-    
-    oneof payload {
-        ClipboardMessage clipboard = 5;
-        AuthResponse auth = 6;
-        GenericTextMessage genericText = 7;
-    }
+  string id = 1;
+  string senderId = 2;
+  int64 createdAt = 3;
+  MessageType type = 4;
+
+  oneof payload {
+    ClipboardMessage clipboard = 5;
+    ConnectedDevices connectedDevices = 6;
+    GenericTextMessage genericText = 7;
+  }
 }
 
-message GenericTextMessage {
-    string text = 1;
-}
+message GenericTextMessage { string text = 1; }
 
 service MessageService {
-    rpc StreamMessages(ClientMessage) returns (stream ServerMessage);
-    rpc SendMessage(ClientMessage) returns (google.protobuf.Empty);
-    rpc IsConnected(google.protobuf.Empty) returns (google.protobuf.BoolValue);
+  rpc StreamMessages(google.protobuf.Empty) returns (stream ServerMessage);
+  rpc SendMessage(stream ClientMessage) returns (google.protobuf.Empty);
+  rpc IsReachable(google.protobuf.Empty) returns (google.protobuf.BoolValue);
 }
