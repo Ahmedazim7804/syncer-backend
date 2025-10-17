@@ -42,9 +42,9 @@ message ServerMessage {
   MessageType type = 4;
 
   oneof payload {
-    ClipboardMessage clipboard = 5;
-    ConnectedDevices connectedDevices = 6;
-    GenericTextMessage genericText = 7;
+    ClipboardMessage Clipboard = 5;
+    ConnectedDevices ConnectedDevices = 6;
+    GenericTextMessage GenericText = 7;
   }
 }
 

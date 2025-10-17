@@ -24,9 +24,7 @@ from src.core.security import TokenData
 
 class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
     def __init__(
-        self,
-        connections: list[Connection],
-        auth_service: AuthService
+        self, connections: list[Connection], auth_service: AuthService
     ) -> None:
         super().__init__()
         self.connections = connections
@@ -34,11 +32,11 @@ class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
 
     async def IsReachable(self, request: empty_pb2.Empty, context):
         return google_dot_protobuf_dot_wrappers__pb2.BoolValue(value=True)
-    
+
     def extractUserToken(self, context):
         metadata = dict(context.invocation_metadata())
-        token = metadata.get('authorization', '')
-        if token.startswith('Bearer '):
+        token = metadata.get("authorization", "")
+        if token.startswith("Bearer "):
             token = token[7:]
 
         logger.info(f"StreamMessages Request Made with token: {token}")
@@ -48,18 +46,17 @@ class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
         return tokenData
 
     async def StreamMessages(self, request: ClientMessage, context):
-
         tokenData = self.extractUserToken(context)
         connection_id = tokenData.id
 
-        if (connection_id in self.connections.keys()):
+        if connection_id in self.connections.keys():
             self.connections[connection_id].active = True
         else:
             self.connections[connection_id] = Connection(
                 id=connection_id,
                 active=True,
                 client=self.auth_service.getUser(connection_id),
-                queue=asyncio.Queue()
+                queue=asyncio.Queue(),
             )
 
         await self.broadcast(sender="sender", message=self.get_all_devices())
@@ -92,7 +89,7 @@ class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
                 tokenData.id,
                 self.construct_message(
                     message=payload, type=messageType, senderId=tokenData.id
-                )
+                ),
             )
 
         return empty_pb2.Empty()
@@ -105,8 +102,9 @@ class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
             senderId=senderId,
             createdAt=int(time.time() * 1000),
             type=type,
-            clipboard=message if type == MessageType.CLIPBOARD else None,
-            genericText=message if type == MessageType.GENERIC_TEXT else None,
+            Clipboard=message if type == MessageType.CLIPBOARD else None,
+            GenericText=message if type == MessageType.GENERIC_TEXT else None,
+            ConnectedDevices=message if type == MessageType.CONNECTED_DEVICES else None,
         )
 
         return message
@@ -126,31 +124,33 @@ class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
             senderId="sender",
             createdAt=int(time.time() * 1000),
             type=MessageType.CONNECTED_DEVICES,
-            clipboard=None,
-            genericText=None,
-            connectedDevices=ConnectedDevices(
-                devices = [
+            ConnectedDevices=ConnectedDevices(
+                devices=[
                     DeviceInfo(
-                        id = connection.client.id,
-                        ip = connection.client.ip,
-                        name = connection.client.device,
-                        connected = True if connection.active is True else False,
-                        last_seen = int(connection.client.last_seen.timestamp())
+                        id=connection.client.id,
+                        ip=connection.client.ip,
+                        name=connection.client.device,
+                        connected=True if connection.active is True else False,
+                        last_seen=int(connection.client.last_seen.timestamp()),
                     )
                     for connection in self.connections.values()
                 ]
-            )
+            ),
         )
 
         return message
-    
-    async def broadcast(self, sender: str, message, to: Optional[list[str]] = None):
-        recievers = self.connections.values() if to is None else filter(lambda connection: connection.id in to, self.connections.values())
 
-        if (to is None):
+    async def broadcast(self, sender: str, message, to: Optional[list[str]] = None):
+        recievers = (
+            self.connections.values()
+            if to is None
+            else filter(
+                lambda connection: connection.id in to, self.connections.values()
+            )
+        )
+
+        if to is None:
             for connection in recievers:
                 if connection.id != sender and connection.active:
                     print("Sending message to connection: ", connection.id)
-                    await connection.queue.put(
-                        message
-                    )
+                    await connection.queue.put(message)
