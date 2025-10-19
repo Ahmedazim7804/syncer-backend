@@ -8,6 +8,7 @@ enum MessageType {
   CLIPBOARD = 0;
   GENERIC_TEXT = 1;
   CONNECTED_DEVICES = 2;
+  SERVER_COMMAND = 3;
 }
 
 message ClipboardMessage { string content = 1; }
@@ -29,9 +30,10 @@ message ClientMessage {
   MessageType type = 3;
 
   oneof payload {
-    ClipboardMessage clipboard = 4;
-    GenericTextMessage genericText = 5;
+    ClipboardMessage Clipboard = 4;
+    GenericTextMessage GenericText = 5;
     google.protobuf.Empty empty = 6;
+    ServerCommand ServerCommand = 7;
   }
 }
 
@@ -46,6 +48,13 @@ message ServerMessage {
     ConnectedDevices ConnectedDevices = 6;
     GenericTextMessage GenericText = 7;
   }
+}
+
+message ServerCommand {
+  // command name
+  string command = 1;
+  // json encoded data
+  string data = 2;
 }
 
 message GenericTextMessage { string text = 1; }

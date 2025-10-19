@@ -29,12 +29,14 @@ class _MessageTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._En
     CLIPBOARD: _MessageType.ValueType  # 0
     GENERIC_TEXT: _MessageType.ValueType  # 1
     CONNECTED_DEVICES: _MessageType.ValueType  # 2
+    SERVER_COMMAND: _MessageType.ValueType  # 3
 
 class MessageType(_MessageType, metaclass=_MessageTypeEnumTypeWrapper): ...
 
 CLIPBOARD: MessageType.ValueType  # 0
 GENERIC_TEXT: MessageType.ValueType  # 1
 CONNECTED_DEVICES: MessageType.ValueType  # 2
+SERVER_COMMAND: MessageType.ValueType  # 3
 global___MessageType = MessageType
 
 @typing.final
@@ -108,28 +110,32 @@ class ClientMessage(google.protobuf.message.Message):
     CLIPBOARD_FIELD_NUMBER: builtins.int
     GENERICTEXT_FIELD_NUMBER: builtins.int
     EMPTY_FIELD_NUMBER: builtins.int
+    SERVERCOMMAND_FIELD_NUMBER: builtins.int
     id: builtins.str
     createdAt: builtins.int
     type: global___MessageType.ValueType
     @property
-    def clipboard(self) -> global___ClipboardMessage: ...
+    def Clipboard(self) -> global___ClipboardMessage: ...
     @property
-    def genericText(self) -> global___GenericTextMessage: ...
+    def GenericText(self) -> global___GenericTextMessage: ...
     @property
     def empty(self) -> google.protobuf.empty_pb2.Empty: ...
+    @property
+    def ServerCommand(self) -> global___ServerCommand: ...
     def __init__(
         self,
         *,
         id: builtins.str = ...,
         createdAt: builtins.int = ...,
         type: global___MessageType.ValueType = ...,
-        clipboard: global___ClipboardMessage | None = ...,
-        genericText: global___GenericTextMessage | None = ...,
+        Clipboard: global___ClipboardMessage | None = ...,
+        GenericText: global___GenericTextMessage | None = ...,
         empty: google.protobuf.empty_pb2.Empty | None = ...,
+        ServerCommand: global___ServerCommand | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["clipboard", b"clipboard", "empty", b"empty", "genericText", b"genericText", "payload", b"payload"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["clipboard", b"clipboard", "createdAt", b"createdAt", "empty", b"empty", "genericText", b"genericText", "id", b"id", "payload", b"payload", "type", b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing.Literal["payload", b"payload"]) -> typing.Literal["clipboard", "genericText", "empty"] | None: ...
+    def HasField(self, field_name: typing.Literal["Clipboard", b"Clipboard", "GenericText", b"GenericText", "ServerCommand", b"ServerCommand", "empty", b"empty", "payload", b"payload"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["Clipboard", b"Clipboard", "GenericText", b"GenericText", "ServerCommand", b"ServerCommand", "createdAt", b"createdAt", "empty", b"empty", "id", b"id", "payload", b"payload", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["payload", b"payload"]) -> typing.Literal["Clipboard", "GenericText", "empty", "ServerCommand"] | None: ...
 
 global___ClientMessage = ClientMessage
 
@@ -170,6 +176,26 @@ class ServerMessage(google.protobuf.message.Message):
     def WhichOneof(self, oneof_group: typing.Literal["payload", b"payload"]) -> typing.Literal["Clipboard", "ConnectedDevices", "GenericText"] | None: ...
 
 global___ServerMessage = ServerMessage
+
+@typing.final
+class ServerCommand(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    COMMAND_FIELD_NUMBER: builtins.int
+    DATA_FIELD_NUMBER: builtins.int
+    command: builtins.str
+    """command name"""
+    data: builtins.str
+    """json encoded data"""
+    def __init__(
+        self,
+        *,
+        command: builtins.str = ...,
+        data: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["command", b"command", "data", b"data"]) -> None: ...
+
+global___ServerCommand = ServerCommand
 
 @typing.final
 class GenericTextMessage(google.protobuf.message.Message):

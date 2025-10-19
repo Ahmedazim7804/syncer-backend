@@ -45,6 +45,26 @@ class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
 
         return tokenData
 
+    async def handleUserMessage(self, message: ClientMessage, context):
+        if message.type == MessageType.SERVER_COMMAND:
+            await self.handleServerCommand(
+                message.ServerCommand.command, message.ServerCommand.data, context
+            )
+        elif message.type == MessageType.CLIPBOARD:
+            pass
+        elif message.type == MessageType.GENERIC_TEXT:
+            pass
+        elif message.type == MessageType.CONNECTED_DEVICES:
+            pass
+        else:
+            logger.error(f"Unknown message type: {message.type}")
+
+    async def handleServerCommand(self, command: str, data: dict, context):
+        if command == "refresh":
+            await self.broadcast(sender="sender", message=self.get_all_devices())
+        else:
+            pass
+
     async def StreamMessages(self, request: ClientMessage, context):
         tokenData = self.extractUserToken(context)
         connection_id = tokenData.id
@@ -81,16 +101,17 @@ class MessageServicer(syncer_pb2_grpc.MessageServiceServicer):
             logger.info(f"Received message: {request}")
 
             tokenData = self.extractUserToken(context)
-
             messageType = request.type
             payload = self.extract_payload(request)
 
-            await self.broadcast(
-                tokenData.id,
-                self.construct_message(
-                    message=payload, type=messageType, senderId=tokenData.id
-                ),
-            )
+            asyncio.create_task(self.handleUserMessage(request, context))
+
+            # await self.broadcast(
+            #     tokenData.id,
+            #     self.construct_message(
+            #         message=payload, type=messageType, senderId=tokenData.id
+            #     ),
+            # )
 
         return empty_pb2.Empty()
 
